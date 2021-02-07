@@ -17,7 +17,11 @@
 
   <a-card>
     <div class="loading-overlay" v-if="loading">
-      <a-spin />
+      <a-spin v-if="!errorLoading"/>
+      <div v-else>
+        <p>Failed To Load</p>
+        <a-button @click="loadSchedule">Try Again</a-button>
+      </div>
     </div>
     <vue-cal 
       class="vuecal-theme"
@@ -41,6 +45,8 @@ export default {
   data () {
     return {
       loading: true,
+      errorLoading: false,
+      filter: null,
       schedule: []
     }
   },
@@ -48,7 +54,12 @@ export default {
     VueCal
   },
   watch: {
-    '$route': 'loadSchedule'
+    '$route': function () {
+      this.loadSchedule()
+    },
+    'filter': function () {
+      this.loadSchedule()
+    }
   },
   computed: {
     events () {
@@ -62,11 +73,14 @@ export default {
     }
   },
   mounted () {
-    this.loadSchedule().then(this.getOngoingEvents)
+    this.loadSchedule()
   },
   methods: {
     onCalendarViewChange(evt) {
-      this.loadSchedule(moment(evt.startDate).format('YYYY-MM-DD'), moment(evt.endDate).format('YYYY-MM-DD'))
+      this.filter = {
+        startDate: moment(evt.startDate).format('YYYY-MM-DD'),
+        endDate: moment(evt.endDate).format('YYYY-MM-DD')
+      } 
     },
     getNormalDateTime (date, time) {
       return moment(`${date} ${time}`, 'DD-MMM-YYYY HHmm').toDate()
@@ -74,14 +88,17 @@ export default {
     ...mapMutations([
       'setRoom'
     ]),
-    loadSchedule (startDate, endDate) {
+    loadSchedule () {
       const roomNumber = this.$route.params.number
       this.setRoom(roomNumber)
 
       this.loading = true
-      return getRoomSchedule(roomNumber, startDate, endDate).then(({data}) => {
+      this.errorLoading = false
+      return getRoomSchedule(roomNumber, this.filter?.startDate, this.filter?.endDate).then(({data}) => {
         this.schedule = data
         this.loading = false
+      }).catch(() => {
+        this.errorLoading = true
       })
     }
   }
