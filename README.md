@@ -1,23 +1,32 @@
 # mpi-room-schedule
 
 ## Project setup
+
+Install Dependencies
+
 ```
-npm install
+yarn install
+```
+
+Edit environment variable
+
+```
+cp .env.example .env.local
 ```
 
 ### Compiles and hot-reloads for development
 ```
-npm run serve
+yarn serve
 ```
 
 ### Compiles and minifies for production
 ```
-npm run build
+yarn build
 ```
 
 ### Lints and fixes files
 ```
-npm run lint
+yarn lint
 ```
 
 ### Customize configuration
